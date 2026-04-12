@@ -1,0 +1,15 @@
+{
+	"name": "SkyCommands",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"whizkydee.material-palenight-theme",
+				"vscodevim.vim",
+				"Vue.volar"
+			]
+		}
+	}
+}

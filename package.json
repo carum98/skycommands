@@ -1,0 +1,12 @@
+{
+  "name": "skycommands",
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=@skycommands/backend",
+    "dev:frontend": "npm run dev --workspace=@skycommands/frontend",
+    "dev": "npm run dev:backend & npm run dev:frontend"
+  }
+}
