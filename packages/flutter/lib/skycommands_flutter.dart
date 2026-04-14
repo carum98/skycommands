@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 
-const _api = 'http://10.0.2.2:3000';
+const _api = 'http://192.168.25.155:3000';
 typedef CommandCallback = Future<String> Function(String command, String? payload);
 
 class SkyCommands {
@@ -20,7 +20,7 @@ class SkyCommands {
     final token = await _fcm.getToken();
     final udid = await FlutterUdid.udid;
 
-    await _httpPost('/register_device', {
+    await _httpPost('/devices/register', {
       'fcmToken': token,
       'udid': udid,
     });
@@ -42,7 +42,7 @@ class SkyCommands {
   }
 
   static Future<void> _result(String commandId, String result) async {
-    await _httpPost('/result', {
+    await _httpPost('/commands/result', {
       'commandId': commandId,
       'result': result,
     });
