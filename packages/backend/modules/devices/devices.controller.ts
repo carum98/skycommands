@@ -16,7 +16,7 @@ export class DevicesController {
 			return res.status(400).json({ error: 'Missing fcmToken or udid' })
 		}
 
-		const existing = this.service.findByUdid(udid)
+		const existing = this.service.find(udid)
 
 		if (existing) {
 			return res.status(400).json({ error: 'Device already registered' })

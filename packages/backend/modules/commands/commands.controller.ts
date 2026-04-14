@@ -15,10 +15,7 @@ export class CommandsController {
 
    execute = async (req: Request, res: Response) => {
       const { deviceCode, uuid, command, payload } = req.body
-
-      const device = uuid
-         ? this.devicesService.findByUdid(uuid)
-         : this.devicesService.findByCode(deviceCode)
+      const device = this.devicesService.find(deviceCode || uuid)
 
       if (!device) {
          return res.status(404).json({ error: 'Device not found' })
@@ -54,6 +51,12 @@ export class CommandsController {
       this.pending.delete(commandId)
 
       res.json({ success: true })
+   }
+
+   ping = async (req: Request, res: Response) => {
+      req.body.deviceCode = req.body.code
+      req.body.command = 'ping'
+      await this.execute(req, res)
    }
 
    private async sendCommand(token: string, data: Record<string, string>): Promise<string> {

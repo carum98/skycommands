@@ -11,5 +11,6 @@ const controller = new CommandsController(service)
 
 router.post('/execute', controller.execute)
 router.post('/result', controller.receive)
+router.post('/ping', controller.ping)
 
 export default router

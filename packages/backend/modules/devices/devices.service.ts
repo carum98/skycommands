@@ -3,12 +3,8 @@ import type { DatabaseSync } from 'node:sqlite'
 export class DevicesService {
 	constructor(private db: DatabaseSync) { }
 
-	findByUdid(udid: string) {
-		return this.db.prepare('SELECT * FROM devices WHERE udid = ?').get(udid)
-	}
-
-	findByCode(code: string) {
-		return this.db.prepare('SELECT * FROM devices WHERE code = ?').get(code)
+	find(codeOrUdid: string) {
+		return this.db.prepare('SELECT * FROM devices WHERE code = ? OR udid = ?').get(codeOrUdid, codeOrUdid)
 	}
 
 	create(data: { code: string; fcmToken: string; udid: string }) {
@@ -16,6 +12,6 @@ export class DevicesService {
 	}
 
 	getAll() {
-		return this.db.prepare('SELECT * FROM devices').all()
+		return this.db.prepare('SELECT code, udid FROM devices').all()
 	}
 }

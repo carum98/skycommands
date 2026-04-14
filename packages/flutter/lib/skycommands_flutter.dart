@@ -20,7 +20,7 @@ class SkyCommands {
     final token = await _fcm.getToken();
     final udid = await FlutterUdid.udid;
 
-    await _httpPost('/devices/register', {
+    await _httpPost('/devices', {
       'fcmToken': token,
       'udid': udid,
     });
@@ -32,6 +32,11 @@ class SkyCommands {
     if (data.containsKey('commandId') && data.containsKey('command')) {
       final commandId = data['commandId'];
       final command = data['command'];
+
+      if (command == 'ping') {
+        await _result(commandId, 'pong');
+        return;
+      }
 
       // Execute the command and get the result
       final result = await executeCommand(command, data['payload']);
