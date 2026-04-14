@@ -63,9 +63,11 @@ async function sendFCM(token: string, payload: Record<string, string>) {
 }
 
 app.post('/execute', async (req, res) => {
-	const { deviceCode, command, payload } = req.body
+	const { deviceCode, uuid, command, payload } = req.body
 
-	const device = db.prepare('SELECT * FROM devices WHERE code = ?').get(deviceCode)
+	const device = uuid 
+		? db.prepare('SELECT * FROM devices WHERE udid = ?').get(uuid)
+		: db.prepare('SELECT * FROM devices WHERE code = ?').get(deviceCode)
 
 	if (!device) {
 		return res.status(404).json({ error: 'Device not found' })
@@ -80,7 +82,7 @@ app.post('/execute', async (req, res) => {
 		const result = await sendCommand(device.fcm_token as string, data)
 
 		res.json({ result: 
-			result.startsWith('{') ? JSON.parse(result) : result
+			result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result
 		 })
 	} catch (error) {
 		res.status(500).json({ error: 'Error executing command' })
