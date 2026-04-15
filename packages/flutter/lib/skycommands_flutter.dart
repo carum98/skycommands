@@ -1,40 +1,55 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_udid/flutter_udid.dart';
+import '../utils/request_http.dart';
 
-const _api = 'http://192.168.25.155:3000';
 typedef CommandCallback = Future<String> Function(String command, String? payload);
 
 class SkyCommands {
-  static final _client = HttpClient();
-  static final _fcm = FirebaseMessaging.instance;
+  final RequestHttp _http;
+  SkyCommands({required String host}) : _http = RequestHttp(host);
 
-  static void initialize(BackgroundMessageHandler callBack) {
+  final _fcm = FirebaseMessaging.instance;
+
+  void initialize(BackgroundMessageHandler callBack) {
     FirebaseMessaging.onBackgroundMessage(callBack);
     FirebaseMessaging.onMessage.listen(callBack);
   }
 
-  static Future<void> registerDevice() async {
+  Future<String> register() async {
     final token = await _fcm.getToken();
     final udid = await FlutterUdid.udid;
 
-    await _httpPost('/devices', {
+    final response = await _http.post('/devices', {
       'fcmToken': token,
       'udid': udid,
     });
+
+    return response['code'];
   }
 
-  static Future<void> runner(RemoteMessage message, CommandCallback executeCommand) async {
+  Future<bool> unregister() async {
+    try {
+      final udid = await FlutterUdid.udid;
+      await _http.delete('/devices/$udid');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> runner(RemoteMessage message, CommandCallback executeCommand) async {
     final data = message.data;
 
     if (data.containsKey('commandId') && data.containsKey('command')) {
       final commandId = data['commandId'];
       final command = data['command'];
 
+      Future<void> sendResult(String result) async {
+        await _http.post('/commands/result', {'commandId': commandId, 'result': result});
+      }
+
       if (command == 'ping') {
-        await _result(commandId, 'pong');
+        await sendResult('pong');
         return;
       }
 
@@ -42,30 +57,7 @@ class SkyCommands {
       final result = await executeCommand(command, data['payload']);
 
       // Send the result back to the server
-      await _result(commandId, result);
-    }
-  }
-
-  static Future<void> _result(String commandId, String result) async {
-    await _httpPost('/commands/result', {
-      'commandId': commandId,
-      'result': result,
-    });
-  }
-
-  static Future<void> _httpPost(String path, Map<String, dynamic> body) async {
-    final url = Uri.parse(_api).replace(path: path);
-
-    final request = await _client.postUrl(url);
-    request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-    request.add(utf8.encode(jsonEncode(body)));
-
-    final response = await request.close();
-    if (response.statusCode == 200) {
-      final responseBody = await response.transform(utf8.decoder).join();
-      print('Response: $responseBody');
-    } else {
-      print('Failed to post data: ${response.statusCode}');
+      await sendResult(result);
     }
   }
 }
