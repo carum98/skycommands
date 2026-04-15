@@ -11,5 +11,6 @@ const controller = new DevicesController(service)
 
 router.get('/', controller.getAll)
 router.post('/', controller.register)
+router.delete('/:code', controller.unregister)
 
 export default router

@@ -27,4 +27,16 @@ export class DevicesController {
 		this.service.create({ code, fcmToken, udid })
 		res.json({ code, fcmToken, udid })
 	}
+
+	unregister = (req: Request, res: Response) => {
+		const { code } = req.params
+
+		if (!code) return res.status(400).json({ error: 'Missing code' })
+
+		const existing = this.service.find(code as string)
+		if (!existing) return res.status(404).json({ error: 'Device not found' })
+
+		this.service.delete(existing.id as number)
+		res.json({ success: true })
+	}
 }

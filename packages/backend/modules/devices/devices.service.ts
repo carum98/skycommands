@@ -11,6 +11,10 @@ export class DevicesService {
 		return this.db.prepare('INSERT INTO devices (code, fcm_token, udid) VALUES (?, ?, ?)').run(data.code, data.fcmToken, data.udid)
 	}
 
+	delete(id: number) {
+		return this.db.prepare('DELETE FROM devices WHERE id = ?').run(id)
+	}
+
 	getAll() {
 		return this.db.prepare('SELECT code, udid FROM devices').all()
 	}
