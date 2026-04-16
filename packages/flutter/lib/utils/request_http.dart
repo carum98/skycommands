@@ -43,7 +43,19 @@ class RequestHttp {
       final responseBody = await response.transform(utf8.decoder).join();
       return jsonDecode(responseBody);
     } else {
-      throw HttpException('Request failed with status: ${response.statusCode}');
+      throw HttpException(
+        response.reasonPhrase ?? 'Unknown error',
+        statusCode: response.statusCode,
+      );
     }
   }
+}
+
+class HttpException implements Exception {
+  final String message;
+  final int? statusCode;
+  const HttpException(this.message, {this.statusCode});
+
+  @override
+  String toString() => 'HttpException: $message (Status code: $statusCode)';
 }

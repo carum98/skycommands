@@ -2,6 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 import '../utils/request_http.dart';
 
+export '../utils/request_http.dart' show HttpException;
+
 typedef CommandCallback = Future<String> Function(String command, String? payload);
 
 class SkyCommands {
@@ -27,14 +29,16 @@ class SkyCommands {
     return response['code'];
   }
 
-  Future<bool> unregister() async {
-    try {
-      final udid = await FlutterUdid.udid;
-      await _http.delete('/devices/$udid');
-      return true;
-    } catch (e) {
-      return false;
-    }
+  Future<void> unregister() async {
+    final udid = await FlutterUdid.udid;
+    await _http.delete('/devices/$udid');
+  }
+
+  Future<void> heartbeat() async {
+    final udid = await FlutterUdid.udid;
+    await _http.post('/devices/heartbeat', {
+      'udid': udid,
+    });
   }
 
   Future<void> runner(RemoteMessage message, CommandCallback executeCommand) async {

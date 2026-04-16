@@ -10,9 +10,11 @@ const migrations = [
 			CREATE TABLE IF NOT EXISTS devices (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				code TEXT UNIQUE,
+				udid TEXT,
 				fcm_token TEXT,
-				udid TEXT
-			)
+				created_at TEXT DEFAULT (datetime('now')),
+				last_seen_at TEXT DEFAULT (datetime('now'))
+			);
 		`
 	}
 ]

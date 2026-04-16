@@ -39,4 +39,19 @@ export class DevicesController {
 		this.service.delete(existing.id as number)
 		res.json({ success: true })
 	}
+
+	heartbeat = async (req: Request, res: Response) => {
+		const { udid } = req.body
+
+		if (!udid) {
+			return res.status(400).json({ error: 'Missing udid' })
+		}
+
+		const existing = this.service.find(udid)
+		if (!existing) return res.status(404).json({ error: 'Device not found' })
+
+		this.service.heartbeat(existing.id as number)
+
+		res.json({ success: true })
+	}
 }

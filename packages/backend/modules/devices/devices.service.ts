@@ -15,7 +15,11 @@ export class DevicesService {
 		return this.db.prepare('DELETE FROM devices WHERE id = ?').run(id)
 	}
 
+	heartbeat(id: number) {
+		return this.db.prepare('UPDATE devices SET last_seen_at = datetime(\'now\') WHERE id = ?').run(id)
+	}
+
 	getAll() {
-		return this.db.prepare('SELECT code, udid FROM devices').all()
+		return this.db.prepare('SELECT code, udid, created_at, last_seen_at FROM devices').all()
 	}
 }
