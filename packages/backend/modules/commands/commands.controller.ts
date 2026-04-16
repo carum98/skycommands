@@ -63,17 +63,20 @@ export class CommandsController {
       const commandId = crypto.randomUUID()
 
       return new Promise(async (resolve, reject) => {
-         const timeout = setTimeout(() => {
-            this.pending.delete(commandId)
-            reject(new Error('Timeout'))
-         }, 10000)
-
-         this.pending.set(commandId, { resolve, reject, timeout })
-
-         await sendFCM(token, {
+         const success = await sendFCM(token, {
             commandId,
             ...data
          })
+
+         if (success) {
+            const timeout = setTimeout(() => {
+               this.pending.delete(commandId)
+               reject(new Error('Timeout'))
+            }, 10000)
+            this.pending.set(commandId, { resolve, reject, timeout })
+         } else {
+            reject(new Error('Failed to send FCM'))
+         }
       })
    }
 }

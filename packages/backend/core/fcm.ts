@@ -8,7 +8,7 @@ admin.initializeApp({
 
 const messaging = admin.messaging()
 
-export async function sendFCM(token: string, payload: Record<string, string>) {
+export async function sendFCM(token: string, payload: Record<string, string>): Promise<boolean> {
 	try {
 		await messaging.send({
 			token: token,
@@ -17,8 +17,9 @@ export async function sendFCM(token: string, payload: Record<string, string>) {
 				priority: 'high'
 			}
 		})
+		return true
 	} catch (error) {
 		console.error('Error sending FCM:', error)
-		throw error
+		return false
 	}
 }
