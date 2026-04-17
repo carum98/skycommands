@@ -5,7 +5,7 @@ export class DevicesController {
 	constructor(private service: DevicesService) { }
 
 	getAll = (req: Request, res: Response) => {
-		const devices = this.service.getAll()
+		const devices = this.service.getAll(req.query as Record<string, string>)
 		res.json(devices)
 	}
 
@@ -51,6 +51,22 @@ export class DevicesController {
 		if (!existing) return res.status(404).json({ error: 'Device not found' })
 
 		this.service.heartbeat(existing.id as number)
+
+		res.json({ success: true })
+	}
+
+	updateMetadata = (req: Request, res: Response) => {
+		const { code } = req.params
+		const metadata = req.body
+
+		if (!code || !metadata) {
+			return res.status(400).json({ error: 'Missing code or metadata' })
+		}
+
+		const existing = this.service.find(code as string)
+		if (!existing) return res.status(404).json({ error: 'Device not found' })
+
+		this.service.updateMetadata(existing.id as number, metadata)
 
 		res.json({ success: true })
 	}

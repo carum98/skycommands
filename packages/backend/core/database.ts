@@ -12,6 +12,7 @@ const migrations = [
 				code TEXT UNIQUE,
 				udid TEXT,
 				fcm_token TEXT,
+				metadata TEXT,
 				created_at TEXT DEFAULT (datetime('now')),
 				last_seen_at TEXT DEFAULT (datetime('now'))
 			);

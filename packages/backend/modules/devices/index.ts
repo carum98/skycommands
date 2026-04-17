@@ -13,5 +13,6 @@ router.get('/', controller.getAll)
 router.post('/', controller.register)
 router.post('/heartbeat', controller.heartbeat)
 router.delete('/:code', controller.unregister)
+router.put('/:code/metadata', controller.updateMetadata)
 
 export default router

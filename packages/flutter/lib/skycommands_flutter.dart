@@ -41,6 +41,11 @@ class SkyCommands {
     });
   }
 
+  Future<void> setMetadata(Map<String, String?> metadata) async {
+    final udid = await FlutterUdid.udid;
+    await _http.put('/devices/$udid/metadata', metadata);
+  }
+
   Future<void> runner(RemoteMessage message, CommandCallback executeCommand) async {
     final data = message.data;
 

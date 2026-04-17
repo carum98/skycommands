@@ -19,7 +19,19 @@ export class DevicesService {
 		return this.db.prepare('UPDATE devices SET last_seen_at = datetime(\'now\') WHERE id = ?').run(id)
 	}
 
-	getAll() {
-		return this.db.prepare('SELECT code, udid, created_at, last_seen_at FROM devices').all()
+	updateMetadata(id: number, metadata: Record<string, unknown>) {
+		return this.db.prepare('UPDATE devices SET metadata = ? WHERE id = ?').run(JSON.stringify(metadata), id)
+	}
+
+	getAll(filter?: Record<string, string>) {
+		const baseQuery = 'SELECT code, udid, metadata, created_at, last_seen_at FROM devices'
+
+		const entries = Object.entries(filter ?? {}).filter(([, v]) => v !== undefined && v !== null)
+		if (entries.length === 0) return this.db.prepare(baseQuery).all()
+
+		const conditions = entries.map(([key]) => `json_extract(metadata, '$.${key}') = ?`)
+		const values = entries.map(([, v]) => v)
+
+		return this.db.prepare(`${baseQuery} WHERE ${conditions.join(' AND ')}`).all(...values)
 	}
 }
