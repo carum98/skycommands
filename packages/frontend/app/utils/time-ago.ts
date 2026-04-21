@@ -1,10 +1,5 @@
 export function timeAgo(dateString: string) {
-	const utcString = /[Zz]$|[+-]\d{2}:?\d{2}$/.test(dateString)
-		? dateString
-		: dateString.replace(' ', 'T') + 'Z'
-	const date = new Date(utcString)
-	const now = new Date()
-	const diff = now.getTime() - date.getTime()
+	const diff = getDiff(dateString)
 
 	const seconds = Math.floor(diff / 1000)
 	const minutes = Math.floor(seconds / 60)
@@ -24,4 +19,14 @@ export function timeAgo(dateString: string) {
 	if (months < 1) return plural(weeks, 'week')
 	if (years < 1) return plural(months, 'month')
 	return plural(years, 'year')
+}
+
+export function getDiff(dateString: string) {
+	const utcString = /[Zz]$|[+-]\d{2}:?\d{2}$/.test(dateString)
+		? dateString
+		: dateString.replace(' ', 'T') + 'Z'
+
+	const date = new Date(utcString)
+	const now = new Date()
+	return now.getTime() - date.getTime()
 }
