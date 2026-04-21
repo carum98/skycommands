@@ -3,6 +3,7 @@ import { ref, useTemplateRef, watch } from 'vue'
 import { useDebounce } from '@composables/useDebounce'
 import { timeAgo } from '@utils/time-ago'
 import { $fetch } from '@utils/fetch'
+import DeviceItem from './DeviceItem.vue'
 
 const targets = [
 	{ name: 'Username', value: 'user_name' },
@@ -80,13 +81,7 @@ function onSelectDevice(item: any) {
 		<div v-else-if="searchResults.length === 0" class="no-results">No results found</div>
 		<ul v-else>
 			<li v-for="item in searchResults" :key="item['code']" @click="onSelectDevice(item)">
-				<p>code: <span>{{ item['code'] }}</span></p>
-				<p>udid: <span>{{ item['udid'] }}</span></p>
-				<p>last seen: <span>{{ item['last_seen_at'] }} ({{ timeAgo(item['last_seen_at']) }})</span></p>
-
-				<div>
-					<p v-for="(value, key) in JSON.parse(item['metadata'])" :key="key">{{ key }}: <span>{{ value }}</span></p>
-				</div>
+				<DeviceItem :device="item" />
 			</li>
 		</ul>
 	</div>

@@ -5,6 +5,7 @@ import DeviceSearch from '@components/DeviceSearch.vue'
 import CommandResult from '@components/CommandResult.vue'
 import { useTimer } from '@composables/useTimer'
 import { $fetch } from '@utils/fetch'
+import DeviceItem from '@components/DeviceItem.vue'
 
 const command = ref(commands[0].command)
 const device = ref<{ code: string } | null>(null)
@@ -99,7 +100,12 @@ async function sendPing() {
 
 			<div class="actions">
 				<div v-if="device">
-					<p><strong>Selected Device:</strong> {{ device['code'] }}</p>
+					<a class="device-info" interestfor="target-id" href="#">
+						<strong>Selected Device:</strong> {{ device['code'] }}
+					</a>
+					<div class="device-info--popover" id="target-id" popover>
+						<DeviceItem :device="device" />
+					</div>
 
 					<button class="ping-button" type="button" @click="sendPing">
 						<svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="m11.86 2l-.52 1.93c4.41.85 7.86 4.3 8.71 8.72l1.95-.52C20.95 7.03 16.96 3.04 11.86 2m-1.04 3.86l-.52 1.95c3.04.46 5.42 2.84 5.88 5.87l1.94-.52c-.66-3.72-3.57-6.66-7.3-7.3m-7.1 3.83A7.96 7.96 0 0 0 5 18.28V22h3v-1.59c.95.39 1.97.59 3 .59c1.14 0 2.27-.25 3.3-.72zm6.07.07l-.53 1.96a3 3 0 0 1 3 3l1.97-.52c-.23-2.34-2.1-4.2-4.44-4.44"/></svg>

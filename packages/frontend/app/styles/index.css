@@ -70,25 +70,6 @@ dialog {
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.devices_list ul {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	width: 380px;
-	list-style: none;
-
-	li {
-		background-color: var(--sk-background);
-		padding: 10px 15px;
-		border-radius: 10px;
-		cursor: pointer;
-
-		&:hover {
-			background-color: var(--sk-background-input);
-		}
-	}
-}
-
 .layout {
 	width: 730px;
 	height: 100vh;
@@ -169,22 +150,6 @@ dialog {
 				border-radius: 10px;
 				cursor: pointer;
 				background-color: var(--sk-background);
-
-				p {
-					&:not(:last-child) {
-						margin-bottom: 2px;
-					}
-
-					span {
-						color: #bbbbbb;
-					}
-				}
-
-				>div {
-					display: grid;
-					grid-template-columns: repeat(2, 1fr);
-					margin-top: 20px;
-				}
 			}
 		}
 	}
@@ -278,6 +243,17 @@ dialog {
 			display: flex;
 			align-items: flex-end;
 			justify-content: space-between;
+		}
+
+		.device-info {
+			color: var(--sk-text);
+			text-decoration: none;
+		}
+
+		.device-info--popover {
+			position-area: bottom;
+			background-color: var(--sk-background-input);
+			padding: 15px;
 		}
 
 		.ping-button {
