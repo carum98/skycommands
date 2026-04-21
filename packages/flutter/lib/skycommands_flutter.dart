@@ -46,7 +46,11 @@ class SkyCommands {
     await _http.put('/devices/$udid/metadata', metadata);
   }
 
-  Future<void> runner(RemoteMessage message, CommandCallback executeCommand) async {
+  Future<void> runner(
+    RemoteMessage message,
+    CommandCallback executeCommand, {
+    Function(String error)? onError,
+  }) async {
     final data = message.data;
 
     if (data.containsKey('commandId') && data.containsKey('command')) {
@@ -57,16 +61,19 @@ class SkyCommands {
         await _http.post('/commands/result', {'commandId': commandId, 'result': result});
       }
 
-      if (command == 'ping') {
-        await sendResult('pong');
-        return;
-      }
-
       // Execute the command and get the result
-      final result = await executeCommand(command, data['payload']);
+      try {
+        if (command == 'ping') {
+          await sendResult('pong');
+          return;
+        }
 
-      // Send the result back to the server
-      await sendResult(result);
+        final result = await executeCommand(command, data['payload']);
+        // Send the result back to the server
+        await sendResult(result);
+      } catch (error) {
+        onError?.call(error.toString());
+      }
     }
   }
 }
