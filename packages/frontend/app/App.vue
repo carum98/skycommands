@@ -79,23 +79,42 @@ async function sendPing() {
 			</div>
 
 			<div class="payload">
-				<label v-for="param in parameters" :key="param.name">
-					{{ param.name }}
-					<textarea :placeholder="param.description" :name="param.name" rows="3"></textarea>
+				<label v-for="param in parameters" :key="param.name" class="payload-param">
+					{{ param.name }} <span v-if="param.required" style="color: red">*</span>
+					<input 
+						v-if="param.inputType === 'input'"
+						type="text"
+						:name="param.name"
+						:required="param.required"
+					/>
+					<textarea 
+						v-else-if="param.inputType === 'textarea'" 
+						:name="param.name" 
+						rows="3"
+						:required="param.required"
+					></textarea>
+					<select 
+						v-else-if="param.inputType === 'select'" 
+						:name="param.name"
+						:required="param.required"
+					>
+							<option v-for="item in param.options" :key="item" :value="item">{{ item }}</option>
+					</select>
+
+					<small>{{ param.description }}</small>
+				</label>
+			</div>
+
+			<div class="payload-config">
+				<label>
+					Timeout
+					<input type="number" name="timeout" placeholder="10000" />
 				</label>
 
-				<div class="payload-params">
-					<label>
-						Timeout
-						<input type="number" name="timeout" placeholder="1000" />
-					</label>
-
-					<label>
-						Retries
-						<input type="number" name="retries" placeholder="0" />
-					</label>
-				</div>
-
+				<label>
+					Retries
+					<input type="number" name="retries" placeholder="0" />
+				</label>
 			</div>
 
 			<div class="actions">
