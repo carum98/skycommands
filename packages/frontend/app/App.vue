@@ -9,7 +9,7 @@ import DeviceItem from '@components/DeviceItem.vue'
 
 const command = ref(commands[0].command)
 const device = ref<{ code: string } | null>(null)
-const result = ref<string | null>(null)
+const result = ref<object | null>(null)
 
 const { executionTimeFormatted, running, startTimer, stopTimer } = useTimer()
 
@@ -25,7 +25,7 @@ async function onSubmit(event: SubmitEvent) {
 	try {
 		startTimer()
 
-		result.value = await $fetch<string>('/commands/execute', {
+		result.value = await $fetch('/commands/execute', {
 			method: 'POST',
 			body: JSON.stringify({
 				deviceCode: device.value?.code,
@@ -36,7 +36,7 @@ async function onSubmit(event: SubmitEvent) {
 			})
 		})
 	} catch (error) {
-		result.value = (error as Error).cause as string || 'An unknown error occurred'
+		result.value = (error as Error).cause || 'An unknown error occurred'
 	} finally {
 		stopTimer()
 	}
@@ -46,14 +46,14 @@ async function sendPing() {
 	try {
 		startTimer()
 
-		result.value = await $fetch<string>('/commands/ping', {
+		result.value = await $fetch('/commands/ping', {
 			method: 'POST',
 			body: JSON.stringify({
 				code: device.value?.code
 			})
 		})
 	} catch (error) {
-		result.value = (error as Error).cause as string || 'An unknown error occurred'
+		result.value = (error as Error).cause || 'An unknown error occurred'
 	} finally {
 		stopTimer()
 	}

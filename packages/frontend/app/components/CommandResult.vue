@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { syntaxHighlight } from '../utils/syntax-highlight'
 
 const props = defineProps<{
-	result: string | null
+	result: object | string
 }>()
 
 const jsonHighlighted = computed(() => {
