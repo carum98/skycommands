@@ -25,7 +25,9 @@ select {
 	font-family: inherit;
 }
 
-input[type="text"], input[type="number"], textarea {
+input[type="text"],
+input[type="number"],
+textarea {
 	background-color: var(--sk-background-input);
 	border: 1px solid var(--sk-border-input);
 	color: var(--sk-text);
@@ -55,7 +57,7 @@ dialog {
 
 	&::backdrop {
 		backdrop-filter: blur(2px);
-    	background-color: #0f1520b3;
+		background-color: #0f1520b3;
 	}
 }
 
@@ -137,7 +139,7 @@ dialog {
 			}
 		}
 
-		> svg {
+		>svg {
 			position: absolute;
 			left: 20px;
 			top: 50%;
@@ -178,7 +180,7 @@ dialog {
 					}
 				}
 
-				> div {
+				>div {
 					display: grid;
 					grid-template-columns: repeat(2, 1fr);
 					margin-top: 20px;
@@ -252,20 +254,22 @@ dialog {
 				margin-top: 8px;
 				margin-bottom: 10px;
 				width: 100%;
+				font-size: 15px;
 			}
 
 			label input {
 				background-color: var(--sk-background);
 				border: none;
 				padding: 8px 15px;
+				font-size: 15px;
 			}
 
 			.payload-params {
 				display: flex;
-				gap: 10px;
+				gap: 15px;
 
-				> * {
-					width: 40%;
+				input {
+					display: block;
 				}
 			}
 		}
@@ -341,12 +345,16 @@ dialog {
 	code {
 		font-family: Consolas, monospace;
 
-		.string, .boolean, .null {
+		.string,
+		.boolean,
+		.null {
 			color: #c88d75;
 		}
+
 		.number {
 			color: #a5bb99;
 		}
+
 		.key {
 			color: #6c94aa;
 		}

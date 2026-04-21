@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, useTemplateRef, watch } from 'vue'
-import { useDebounce } from '../composables/useDebounce'
-import { timeAgo } from '../utils/time-ago'
+import { useDebounce } from '@composables/useDebounce'
+import { timeAgo } from '@utils/time-ago'
+import { $fetch } from '@utils/fetch'
 
 const targets = [
 	{ name: 'Username', value: 'user_name' },
@@ -33,9 +34,11 @@ watch(debounced, async (newValue) => {
 
 	try {
 		loading.value = true
-		const response = await fetch(`http://localhost:3000/devices?${target.value}=${encodeURIComponent(newValue)}`)
-		const data = await response.json()
-		searchResults.value = data
+		searchResults.value = await $fetch<any>(`/devices`, {
+			query: {
+				[target.value]: newValue
+			}
+		})
 	} catch (error) {
 		console.error('Search error:', error)
 	} finally {

@@ -1,83 +1,61 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import commands from '../commands.json'
-import DeviceSearch from './components/DeviceSearch.vue'
-import CommandResult from './components/CommandResult.vue'
+import DeviceSearch from '@components/DeviceSearch.vue'
+import CommandResult from '@components/CommandResult.vue'
+import { useTimer } from '@composables/useTimer'
+import { $fetch } from '@utils/fetch'
 
 const command = ref(commands[0].command)
 const device = ref<{ code: string } | null>(null)
 const result = ref<string | null>(null)
 
-const executionTime = ref<number | null>(null)
-const running = ref(false)
-let startTime = 0
-let timerInterval: ReturnType<typeof setInterval> | null = null
+const { executionTimeFormatted, running, startTimer, stopTimer } = useTimer()
 
 const parameters = computed(() => commands.find(cmd => cmd.command === command.value)?.parameters)
 
-function onSubmit(event: SubmitEvent) {
-	const button = event.submitter as HTMLButtonElement
-	if (!button) return
-
+async function onSubmit(event: SubmitEvent) {
 	const form = event.target as HTMLFormElement
 	const formData = new FormData(form)
 	const json = Object.fromEntries(formData.entries())
 
 	const { command, timeout, retries, ...payload } = json
 
-	button.disabled = true
-	executionTime.value = null
-	running.value = true
-	startTime = Date.now()
-	timerInterval = setInterval(() => {
-		executionTime.value = Date.now() - startTime
-	}, 100)
+	try {
+		startTimer()
 
-	fetch('http://localhost:3000/commands/execute', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			deviceCode: device.value?.code,
-			command,
-			payload
+		result.value = await $fetch<string>('/commands/execute', {
+			method: 'POST',
+			body: JSON.stringify({
+				deviceCode: device.value?.code,
+				command,
+				timeout: Number(timeout) || 1000,
+				retries: Number(retries) || 0,
+				payload
+			})
 		})
-	})
-		.then(response => response.json())
-		.then(data => {
-			result.value = data
-		})
-		.catch(error => {
-			console.error('Error:', error)
-		})
-		.finally(() => {
-			button.disabled = false
-			running.value = false
-			if (timerInterval) clearInterval(timerInterval)
-			executionTime.value = Date.now() - startTime
-		})
+	} catch (error) {
+		console.error('Error:', error)
+	} finally {
+		stopTimer()
+	}
 }
 
-function sendPing() {
-	if (!device.value) return
+async function sendPing() {
+	try {
+		startTimer()
 
-	fetch(`http://localhost:3000/commands/ping`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			code: device.value.code
+		result.value = await $fetch<string>('/commands/ping', {
+			method: 'POST',
+			body: JSON.stringify({
+				code: device.value?.code
+			})
 		})
-	})
-		.then(response => response.json())
-		.then(data => {
-			result.value = data
-		})
-		.catch(error => {
-			console.error('Ping error:', error)
-		})
+	} catch (error) {
+		console.error('Ping error:', error)
+	} finally {
+		stopTimer()
+	}
 }
 </script>
 
@@ -130,10 +108,10 @@ function sendPing() {
 				</div>
 
 				<div class="execute-wrapper">
-					<span v-if="executionTime !== null" class="exec-timer" :class="{ running }">
-						{{ (executionTime / 1000).toFixed(1) }}s
+					<span class="exec-timer" :class="{ running }">
+						{{ executionTimeFormatted }}
 					</span>
-					<button type="submit">
+					<button type="submit" :disabled="!device || running">
 						Execute Command
 					</button>
 				</div>
