@@ -4,9 +4,14 @@ import commands from '../commands.json'
 import DeviceSearch from './components/DeviceSearch.vue'
 import CommandResult from './components/CommandResult.vue'
 
-const command = ref('')
+const command = ref(commands[0].command)
 const device = ref<{ code: string } | null>(null)
 const result = ref<string | null>(null)
+
+const executionTime = ref<number | null>(null)
+const running = ref(false)
+let startTime = 0
+let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const parameters = computed(() => commands.find(cmd => cmd.command === command.value)?.parameters)
 
@@ -18,9 +23,15 @@ function onSubmit(event: SubmitEvent) {
 	const formData = new FormData(form)
 	const json = Object.fromEntries(formData.entries())
 
-	const { command, ...payload } = json
+	const { command, timeout, retries, ...payload } = json
 
 	button.disabled = true
+	executionTime.value = null
+	running.value = true
+	startTime = Date.now()
+	timerInterval = setInterval(() => {
+		executionTime.value = Date.now() - startTime
+	}, 100)
 
 	fetch('http://localhost:3000/commands/execute', {
 		method: 'POST',
@@ -42,13 +53,40 @@ function onSubmit(event: SubmitEvent) {
 		})
 		.finally(() => {
 			button.disabled = false
+			running.value = false
+			if (timerInterval) clearInterval(timerInterval)
+			executionTime.value = Date.now() - startTime
+		})
+}
+
+function sendPing() {
+	if (!device.value) return
+
+	fetch(`http://localhost:3000/commands/ping`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			code: device.value.code
+		})
+	})
+		.then(response => response.json())
+		.then(data => {
+			result.value = data
+		})
+		.catch(error => {
+			console.error('Ping error:', error)
 		})
 }
 </script>
 
 <template>
 	<main class="layout">
-		<h1>SkyCommands</h1>
+		<h1 class="title">
+			<img src="/favicon.ico" alt="SkyCommands Logo" width="35" height="35" />
+			SkyCommands
+		</h1>
 
 		<DeviceSearch v-model:device="device" />
 
@@ -66,21 +104,39 @@ function onSubmit(event: SubmitEvent) {
 					{{ param.name }}
 					<textarea :placeholder="param.description" :name="param.name" rows="3"></textarea>
 				</label>
+
+				<div class="payload-params">
+					<label>
+						Timeout
+						<input type="number" name="timeout" placeholder="1000" />
+					</label>
+
+					<label>
+						Retries
+						<input type="number" name="retries" placeholder="0" />
+					</label>
+				</div>
+
 			</div>
 
 			<div class="actions">
 				<div v-if="device">
 					<p><strong>Selected Device:</strong> {{ device['code'] }}</p>
 
-					<button class="ping-button" type="button">
+					<button class="ping-button" type="button" @click="sendPing">
 						<svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="m11.86 2l-.52 1.93c4.41.85 7.86 4.3 8.71 8.72l1.95-.52C20.95 7.03 16.96 3.04 11.86 2m-1.04 3.86l-.52 1.95c3.04.46 5.42 2.84 5.88 5.87l1.94-.52c-.66-3.72-3.57-6.66-7.3-7.3m-7.1 3.83A7.96 7.96 0 0 0 5 18.28V22h3v-1.59c.95.39 1.97.59 3 .59c1.14 0 2.27-.25 3.3-.72zm6.07.07l-.53 1.96a3 3 0 0 1 3 3l1.97-.52c-.23-2.34-2.1-4.2-4.44-4.44"/></svg>
 						Ping
 					</button>
 				</div>
 
-				<button type="submit">
-					Execute Command
-				</button>
+				<div class="execute-wrapper">
+					<span v-if="executionTime !== null" class="exec-timer" :class="{ running }">
+						{{ (executionTime / 1000).toFixed(1) }}s
+					</span>
+					<button type="submit">
+						Execute Command
+					</button>
+				</div>
 			</div>
 		</form>
 

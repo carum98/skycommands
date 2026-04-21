@@ -27,10 +27,13 @@ export class CommandsController {
             ...(payload && { payload: JSON.stringify(payload) })
          } as Record<string, string>
 
+         const start = Date.now()
          const result = await this.sendCommand(device.fcm_token as string, data)
+         const elapsed = Date.now() - start
 
          res.json({
-            result: result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result
+            elapsed,
+            result: result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result,
          })
       } catch (error) {
          res.status(500).json({ error: 'Error executing command' })

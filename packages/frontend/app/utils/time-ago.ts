@@ -1,5 +1,8 @@
 export function timeAgo(dateString: string) {
-	const date = new Date(dateString)
+	const utcString = /[Zz]$|[+-]\d{2}:?\d{2}$/.test(dateString)
+		? dateString
+		: dateString.replace(' ', 'T') + 'Z'
+	const date = new Date(utcString)
 	const now = new Date()
 	const diff = now.getTime() - date.getTime()
 
