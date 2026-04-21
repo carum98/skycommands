@@ -25,7 +25,8 @@ export async function $fetch<T>(url: string, options?: FetchRequestOptions) {
 	})
 
 	if (!response.ok) {
-		throw new Error(response.statusText)
+		const errorText = await response.json()
+		throw new Error(response.statusText, { cause: errorText })
 	}
 
 	if (response.status === 204) {

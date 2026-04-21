@@ -30,13 +30,13 @@ async function onSubmit(event: SubmitEvent) {
 			body: JSON.stringify({
 				deviceCode: device.value?.code,
 				command,
-				timeout: Number(timeout) || 1000,
-				retries: Number(retries) || 0,
+				timeout: Number(timeout) || undefined,
+				retries: Number(retries) || undefined,
 				payload
 			})
 		})
 	} catch (error) {
-		console.error('Error:', error)
+		result.value = (error as Error).cause as string || 'An unknown error occurred'
 	} finally {
 		stopTimer()
 	}
@@ -53,7 +53,7 @@ async function sendPing() {
 			})
 		})
 	} catch (error) {
-		console.error('Ping error:', error)
+		result.value = (error as Error).cause as string || 'An unknown error occurred'
 	} finally {
 		stopTimer()
 	}

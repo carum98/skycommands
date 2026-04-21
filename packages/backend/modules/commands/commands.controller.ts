@@ -14,7 +14,7 @@ export class CommandsController {
    constructor(private devicesService: DevicesService) { }
 
    execute = async (req: Request, res: Response) => {
-      const { deviceCode, uuid, command, payload } = req.body
+      const { deviceCode, uuid, command, payload, timeout = 10000, retries = 1 } = req.body
       const device = this.devicesService.find(deviceCode || uuid)
 
       if (!device) {
@@ -28,15 +28,28 @@ export class CommandsController {
          } as Record<string, string>
 
          const start = Date.now()
-         const result = await this.sendCommand(device.fcm_token as string, data)
+         let result: string | undefined
+         let lastError: Error | undefined
+
+         for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+               result = await this.sendCommand(device.fcm_token as string, data, timeout)
+               break
+            } catch (error) {
+               lastError = error as Error
+            }
+         }
+
+         if (result === undefined) throw lastError
+
          const elapsed = Date.now() - start
 
          res.json({
             elapsed,
             result: result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result,
          })
-      } catch (error) {
-         res.status(500).json({ error: 'Error executing command' })
+      } catch (error: Error | unknown) {
+         res.status(500).json({ error: (error as Error).message || 'Error executing command' })
       }
    }
 
@@ -62,7 +75,7 @@ export class CommandsController {
       await this.execute(req, res)
    }
 
-   private async sendCommand(token: string, data: Record<string, string>): Promise<string> {
+   private async sendCommand(token: string, data: Record<string, string>, timeout = 10000): Promise<string> {
       const commandId = crypto.randomUUID()
 
       return new Promise(async (resolve, reject) => {
@@ -72,11 +85,11 @@ export class CommandsController {
          })
 
          if (success) {
-            const timeout = setTimeout(() => {
+            const timer = setTimeout(() => {
                this.pending.delete(commandId)
                reject(new Error('Timeout'))
-            }, 10000)
-            this.pending.set(commandId, { resolve, reject, timeout })
+            }, timeout)
+            this.pending.set(commandId, { resolve, reject, timeout: timer })
          } else {
             reject(new Error('Failed to send FCM'))
          }
