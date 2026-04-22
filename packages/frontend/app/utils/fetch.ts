@@ -1,7 +1,7 @@
 export type FetchRequestOptions = RequestInit & { query?: Record<string, string | undefined> }
 
 export async function $fetch<T>(url: string, options?: FetchRequestOptions) {
-	const uri = new URL('/api' + url)
+	const uri = new URL('/api' + url, window.location.origin)
 
 	// Add query parameters to the URL
 	if (options?.query) {
