@@ -10,7 +10,7 @@ RUN npm install && npm cache clean --force
 COPY . .
 
 # Simulate serviceAccountKey.json for build
-RUN echo "" > serviceAccountKey.json
+RUN echo "{}" > serviceAccountKey.json
 
 RUN npm run build
 RUN npm prune --production
