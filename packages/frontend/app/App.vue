@@ -1,19 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import commands from '../commands.json'
+import { ref, computed, onMounted } from 'vue'
 import DeviceSearch from '@components/DeviceSearch.vue'
 import CommandResult from '@components/CommandResult.vue'
 import { useTimer } from '@composables/useTimer'
 import { $fetch } from '@utils/fetch'
 import DeviceItem from '@components/DeviceItem.vue'
 
-const command = ref(commands[0].command)
+const commands = ref<any[]>([])
+const command = ref('')
 const device = ref<{ code: string } | null>(null)
 const result = ref<object | null>(null)
 
+onMounted(async () => {
+	const res = await fetch('/commands.json')
+	commands.value = await res.json()
+	command.value = commands.value[0]?.command ?? ''
+})
+
 const { executionTimeFormatted, running, startTimer, stopTimer } = useTimer()
 
-const parameters = computed(() => commands.find(cmd => cmd.command === command.value)?.parameters)
+const parameters = computed(() => commands.value.find((cmd: any) => cmd.command === command.value)?.parameters)
 
 async function onSubmit(event: SubmitEvent) {
 	const form = event.target as HTMLFormElement
