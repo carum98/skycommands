@@ -1,8 +1,9 @@
 import { getDB } from '@core/database'
-import { DepencyInjection } from '@core/di'
 import { Server } from '@core/server'
-
+import { DepencyInjection } from '@core/di'
 import { DevicesService } from '@devices/devices.service'
+
+import '@core/scheduler'
 
 const db = getDB()
 
