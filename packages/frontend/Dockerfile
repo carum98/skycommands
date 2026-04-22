@@ -12,7 +12,7 @@ RUN npm install && npm cache clean --force
 COPY . .
 
 # Simulate commands.json for build
-RUN echo "" > commands.json
+RUN echo "[]" > commands.json
 
 RUN npm run build
 

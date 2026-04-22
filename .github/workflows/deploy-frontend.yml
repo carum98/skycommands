@@ -51,8 +51,8 @@ jobs:
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
-          mkdir -p /skycommands/frontend &&
-          cd /skycommands/frontend &&
+          mkdir -p ~/skycommands/frontend &&
+          cd ~/skycommands/frontend &&
           docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN_DEPLOY }} &&
           docker pull ${{ env.IMAGE_REF }} &&
           docker rm -f ${{ env.IMAGE_NAME }} || true &&
