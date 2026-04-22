@@ -1,0 +1,63 @@
+name: Deploy Frontend
+
+on:
+  push:
+    paths:
+      - 'packages/frontend/**'
+  pull_request:
+    paths:
+      - 'packages/frontend/**'
+
+env:
+  IMAGE_NAME: skycommands-frontend
+  IMAGE_REF: ghcr.io/${{ github.actor }}/skycommands-frontend:${{ github.ref_name }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: packages/frontend
+        sparse-checkout-cone-mode: false
+    
+    - name: Docker Login
+      uses: docker/login-action@v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.TOKEN_DEPLOY }}
+        logout: true
+    
+    - name: Build the Docker image
+      run: cd packages/frontend && docker build . --tag ${{ env.IMAGE_REF }}
+
+    - name: Send to registry
+      run: docker push ${{ env.IMAGE_REF }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: build-and-push
+    
+    steps:
+    - name: Pull and start the container
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: |
+          mkdir -p /skycommands/frontend &&
+          cd /skycommands/frontend &&
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN_DEPLOY }} &&
+          docker pull ${{ env.IMAGE_REF }} &&
+          docker rm -f ${{ env.IMAGE_NAME }} || true &&
+          docker run -d --restart unless-stopped \
+            --name ${{ env.IMAGE_NAME }} \
+            -p ${{ vars.PORT_FRONTEND }}:8080 \
+            -v $(pwd)/commands.json:/app/commands.json \
+            ${{ env.IMAGE_REF }}

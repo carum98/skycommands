@@ -1,10 +1,13 @@
 FROM node:25-alpine3.22
 
 # Install TypeScript globally
-RUN npm install -g typescript
+RUN npm install -g typescript@6.0.3
 
 # Install git
 RUN apk add --no-cache git
+
+# Install sqlite
+RUN apk add --no-cache sqlite
 
 # Install zsh
 RUN apk add --no-cache zsh
