@@ -59,6 +59,9 @@ jobs:
           docker run -d --restart unless-stopped \
             --name ${{ env.IMAGE_NAME }} \
             -p ${{ vars.PORT_BACKEND }}:3000 \
+            -e AUTH_USERNAME='${{ secrets.AUTH_USERNAME }}' \
+            -e AUTH_PASSWORD='${{ secrets.AUTH_PASSWORD }}' \
+            -e APP_KEY='${{ secrets.APP_KEY }}' \
             -v $(pwd)/database.db:/app/database.db \
             -v $(pwd)/serviceAccountKey.json:/app/serviceAccountKey.json \
             ${{ env.IMAGE_REF }}
