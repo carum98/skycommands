@@ -13,6 +13,8 @@ export default defineConfig({
 			'@composables': path.resolve(__dirname, 'app/composables'),
 			'@styles': path.resolve(__dirname, 'app/styles'),
 			'@components': path.resolve(__dirname, 'app/components'),
+			'@pages': path.resolve(__dirname, 'app/pages'),
+			'@router': path.resolve(__dirname, 'app/router'),
 		},
 	},
 	server: {

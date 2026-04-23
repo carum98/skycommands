@@ -15,6 +15,12 @@
          ],
          "@composables/*": [
             "./app/composables/*"
+         ],
+         "@pages/*": [
+            "./app/pages/*"
+         ],
+         "@router/*": [
+            "./app/router/*"
          ]
       }
    }

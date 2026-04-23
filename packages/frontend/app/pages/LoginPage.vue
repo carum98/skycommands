@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@composables/useAuth'
 
+const router = useRouter()
+const route = useRoute()
 const { login } = useAuth()
 
 const username = ref('')
@@ -15,6 +18,8 @@ async function onSubmit() {
 
 	try {
 		await login(username.value, password.value)
+		const redirect = (route.query.redirect as string) || '/'
+		router.push(redirect)
 	} catch {
 		error.value = 'Invalid username or password'
 	} finally {
