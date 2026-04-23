@@ -3,9 +3,10 @@ import 'dart:io';
 
 class RequestHttp {
   final String host;
+  final String? _appKey;
   final _client = HttpClient();
 
-  RequestHttp(this.host);
+  RequestHttp(this.host, {String? appKey}) : _appKey = appKey;
 
   Future<Map<String, dynamic>> get(String path) async {
     return await _request('GET', path);
@@ -37,6 +38,10 @@ class RequestHttp {
       'PUT' => await _client.putUrl(uri),
       _ => throw ArgumentError('Unsupported HTTP method: $method'),
     };
+
+    if (_appKey != null) {
+      request.headers.set('authorization', 'Bearer $_appKey');
+    }
 
     if (body != null) {
       request.headers.set('content-type', 'application/json');

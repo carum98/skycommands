@@ -1,4 +1,5 @@
 import express from 'express'
+import { auth } from '@core/auth'
 
 export class Server {
 	private app = express()
@@ -18,6 +19,8 @@ export class Server {
 
 			next()
 		})
+
+		this.app.use(auth)
 	}
 
 	use(path: string, router: express.Router) {

@@ -8,7 +8,8 @@ typedef CommandCallback = Future<String> Function(String command, String? payloa
 
 class SkyCommands {
   final RequestHttp _http;
-  SkyCommands({required String host}) : _http = RequestHttp(host);
+  SkyCommands({required String host, String? appKey})
+      : _http = RequestHttp(host, appKey: appKey);
 
   final _fcm = FirebaseMessaging.instance;
 

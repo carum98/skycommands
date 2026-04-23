@@ -1,7 +1,9 @@
+import { useAuth } from '@composables/useAuth'
+
 export type FetchRequestOptions = RequestInit & { query?: Record<string, string | undefined> }
 
 export async function $fetch<T>(url: string, options?: FetchRequestOptions) {
-	const uri = new URL('/api' + url, window.location.origin)
+	const uri = new URL(url, 'http://localhost:3000')
 
 	// Add query parameters to the URL
 	if (options?.query) {
@@ -12,16 +14,15 @@ export async function $fetch<T>(url: string, options?: FetchRequestOptions) {
 		})
 	}
 
-	if (options?.method === 'POST') {
-		options.headers = {
-			'Content-Type': 'application/json',
-			...options.headers,
-		}
-	}
+	const token = useAuth().getToken()
 
 	const response = await fetch(uri, {
 		...options,
-		// credentials: 'include', // Send cookies
+		headers: {
+			...(options?.method === 'POST' && { 'Content-Type': 'application/json' }),
+			...(token && { Authorization: `Basic ${token}` }),
+			...options?.headers,
+		},
 	})
 
 	if (!response.ok) {
