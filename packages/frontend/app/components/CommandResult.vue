@@ -33,3 +33,49 @@ function onFullscreen() {
 		</button>
 	</div>
 </template>
+
+<style>
+.command_result {
+	background-color: var(--sk-surface);
+	border-radius: 15px;
+	width: 100%;
+	max-height: 600px;
+	position: relative;
+
+	pre {
+		overflow: scroll;
+		white-space: pre;
+		height: 100%;
+		padding: 20px;
+	}
+
+	code {
+		font-family: Consolas, monospace;
+
+		.string,
+		.boolean,
+		.null {
+			color: #c88d75;
+		}
+
+		.number {
+			color: #a5bb99;
+		}
+
+		.key {
+			color: #6c94aa;
+		}
+	}
+
+	.fullscreen-btn {
+		background-color: transparent;
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		color: var(--sk-text);
+		border: none;
+		padding: 5px 10px;
+		border-radius: 10px;
+	}
+}
+</style>

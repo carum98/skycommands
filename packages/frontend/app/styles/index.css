@@ -6,13 +6,13 @@ body {
 	color: var(--sk-text);
 	height: 100vh;
 	color-scheme: dark;
-	font-family: 'Poppins', sans-serif;
 }
 
 * {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
+	font-family: Poppins, sans-serif;
 }
 
 button {
@@ -71,319 +71,76 @@ dialog {
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.layout {
+[data-layout="login"] {
+	display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+	footer {
+		position: fixed;
+    	bottom: 10px;
+    	left: 0;
+    	right: 0;
+    	text-align: center;
+    	font-size: 14px;
+		color: rgba(255, 255, 255, 0.3);
+
+		a {
+			color: inherit;
+		}
+	}
+}
+
+[data-layout="home"] {
 	width: 700px;
 	margin: auto;
-	padding: 80px 0px;
+	padding: 30px 0px;
 
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	gap: 2rem;
 
-	.title {
+	header {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		font-weight: 600;
-
-		img {
-			box-shadow: 0 0 .75rem rgba(0, 73, 163, .5);
-		}
-	}
-
-	.search-wrapper {
-		position: relative;
+		justify-content: space-between;
 		width: 100%;
-		anchor-name: --search-wrapper;
+		margin-bottom: 20px;
 
-		.search-select {
-			position: absolute;
-			right: 10px;
-			top: 50%;
-			width: 120px;
-			transform: translateY(-50%);
-			border: unset;
-			background-color: var(--sk-surface);
-			color: var(--sk-text);
-			padding: 8px;
-			border-radius: 25px;
-			font-size: 15px;
-			cursor: pointer;
-
-			appearance: none;
-			text-align: center;
-			padding-right: 10px;
-
-			&:focus {
-				outline: none;
-			}
-		}
-
-		>svg {
-			position: absolute;
-			left: 20px;
-			top: 50%;
-			transform: translateY(-50%);
-			color: gray;
-		}
-	}
-
-	.search-results {
-		position-anchor: --search-wrapper;
-		top: anchor(bottom);
-		left: anchor(left);
-		right: anchor(right);
-		margin-top: 5px;
-
-		background-color: var(--sk-background-input);
-		padding: 15px;
-
-		ul {
-			list-style: none;
+		h1 {
 			display: flex;
-			flex-direction: column;
+			align-items: center;
 			gap: 10px;
+			font-weight: 400;
 
-			li {
-				padding: 10px 15px;
-				border-radius: 10px;
-				cursor: pointer;
-				background-color: var(--sk-background);
+			img {
+				box-shadow: 0 0 .75rem rgba(0, 73, 163, .5);
+			}
+		}
+
+		button {
+			background: none;
+			color: var(--sk-text);
+			opacity: 0.5;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-size: 18px;
+			padding: 4px 8px;
+			border-radius: 8px;
+
+			&:hover {
+				opacity: 1;
+				background-color: var(--sk-background-input);
 			}
 		}
 	}
 
-	.search-input {
-		border: unset;
-		width: 100%;
-		padding: 13px 20px 13px 55px;
-		border-radius: 25px;
-		background-color: var(--sk-background-input);
-		color: var(--sk-text);
-		font-size: 17px;
-	}
-
-	.panel {
-		background-color: var(--sk-surface);
-		padding: 20px;
-		border-radius: 20px;
-		width: 100%;
-
+	main {
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
-
-		.commands {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			grid-template-rows: repeat(2, 1fr);
-			gap: 15px;
-
-			label {
-				background-color: var(--sk-background);
-				padding: 10px 15px;
-				cursor: pointer;
-				border-radius: 15px;
-				min-width: 0;
-
-				input[type="radio"] {
-					display: none;
-				}
-
-				&:has(input[type="radio"]:checked) {
-					background-color: var(--sk-primary);
-
-					small {
-						color: #fff;
-					}
-				}
-
-				p {
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
-				}
-
-				small {
-					display: block;
-					margin-top: 5px;
-					color: #bbbbbb;
-				}
-			}
-		}
-
-		.payload {
-			background-color: var(--sk-background-input);
-			border-radius: 10px;
-			padding: 15px;
-
-			&:empty {
-				display: none;
-			}
-
-			.payload-param {
-				display: block;
-
-				&:not(:last-child) {
-					margin-bottom: 10px;
-				}
-
-				>* {
-					margin-top: 5px;
-				}
-
-				textarea {
-					background-color: var(--sk-background);
-					border: none;
-					padding: 10px 15px;
-					width: 100%;
-					font-size: 15px;
-				}
-
-				input {
-					background-color: var(--sk-background);
-					border: none;
-					padding: 8px 15px;
-					font-size: 15px;
-					width: 100%;
-				}
-
-				select {
-					background-color: var(--sk-background);
-					border: none;
-					padding: 8px 15px;
-					font-size: 15px;
-					width: 100%;
-					appearance: none;
-				}
-
-				small {
-					display: block;
-					margin-top: 5px;
-					color: #bbbbbb;
-				}
-			}
-		}
-
-		.payload-config {
-			display: flex;
-			gap: 15px;
-
-			input {
-				display: block;
-				background-color: var(--sk-background);
-				border: none;
-				padding: 8px 15px;
-				font-size: 15px;
-			}
-		}
-
-		.actions {
-			display: flex;
-			align-items: flex-end;
-			justify-content: space-between;
-		}
-
-		.device-info {
-			color: var(--sk-text);
-			text-decoration: none;
-		}
-
-		.device-info--popover {
-			position-area: bottom;
-			background-color: var(--sk-background-input);
-			padding: 15px;
-		}
-
-		.ping-button {
-			background-color: var(--sk-primary);
-			padding: 5px 12px;
-			border-radius: 10px;
-			color: var(--sk-text);
-			width: fit-content;
-			margin-top: 10px;
-
-			display: flex;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.execute-wrapper {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			margin-left: auto;
-		}
-
-		.exec-timer {
-			font-size: 18px;
-			color: var(--sk-text);
-			opacity: 0.6;
-			font-variant-numeric: tabular-nums;
-
-			&.running {
-				opacity: 1;
-				color: var(--sk-primary);
-			}
-		}
-
-		button[type="submit"] {
-			background-color: color-mix(in oklab, var(--sk-primary) 80%, var(--sk-surface) 20%);
-			padding: 7px 18px;
-			border-radius: 10px;
-			color: var(--sk-text);
-			font-size: 15px;
-			width: fit-content;
-
-			&:disabled {
-				background-color: #0160BE80;
-				cursor: progress;
-			}
-		}
-	}
-}
-
-.command_result {
-	background-color: var(--sk-surface);
-	border-radius: 15px;
-	width: 100%;
-	max-height: 600px;
-	position: relative;
-
-	pre {
-		overflow: scroll;
-		white-space: pre;
-		height: 100%;
-		padding: 20px;
-	}
-
-	code {
-		font-family: Consolas, monospace;
-
-		.string,
-		.boolean,
-		.null {
-			color: #c88d75;
-		}
-
-		.number {
-			color: #a5bb99;
-		}
-
-		.key {
-			color: #6c94aa;
-		}
-	}
-
-	.fullscreen-btn {
-		background-color: transparent;
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		color: var(--sk-text);
-		border: none;
-		padding: 5px 10px;
-		border-radius: 10px;
 	}
 }

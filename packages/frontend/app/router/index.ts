@@ -10,12 +10,18 @@ const router = createRouter({
 			path: '/',
 			name: 'home',
 			component: HomePage,
-			meta: { requiresAuth: true },
+			meta: { 
+				requiresAuth: true,
+				layout: 'home',
+			},
 		},
 		{
 			path: '/login',
 			name: 'login',
 			component: LoginPage,
+			meta: {
+				layout: 'login',
+			},
 		},
 	],
 })
@@ -30,6 +36,12 @@ router.beforeEach((to) => {
 	if (to.name === 'login' && isAuthenticated.value) {
 		return { name: 'home' }
 	}
+})
+
+// Handle layout changes
+router.afterEach((to) => {
+	const layout = (to.meta.layout as string) || 'default'
+	document.body.setAttribute('data-layout', layout)
 })
 
 export default router

@@ -86,3 +86,77 @@ function onSelectDevice(item: any) {
 		</ul>
 	</div>
 </template>
+
+<style scoped>
+.search-wrapper {
+	position: relative;
+	width: 100%;
+	anchor-name: --search-wrapper;
+
+	.search-input {
+		border: unset;
+		width: 100%;
+		padding: 13px 20px 13px 55px;
+		border-radius: 25px;
+		background-color: var(--sk-background-input);
+		color: var(--sk-text);
+		font-size: 17px;
+	}
+
+	.search-select {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		width: 120px;
+		transform: translateY(-50%);
+		border: unset;
+		background-color: var(--sk-surface);
+		color: var(--sk-text);
+		padding: 8px;
+		border-radius: 25px;
+		font-size: 15px;
+		cursor: pointer;
+
+		appearance: none;
+		text-align: center;
+		padding-right: 10px;
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	>svg {
+		position: absolute;
+		left: 20px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: gray;
+	}
+}
+
+.search-results {
+	position-anchor: --search-wrapper;
+	top: anchor(bottom);
+	left: anchor(left);
+	right: anchor(right);
+	margin-top: 5px;
+
+	background-color: var(--sk-background-input);
+	padding: 15px;
+
+	ul {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+
+		li {
+			padding: 10px 15px;
+			border-radius: 10px;
+			cursor: pointer;
+			background-color: var(--sk-background);
+		}
+	}
+}
+</style>

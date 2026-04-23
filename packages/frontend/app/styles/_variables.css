@@ -7,4 +7,7 @@
 	--sk-border-input: #1f3953;
 
 	--sk-surface: #121212;
+
+	--drop-shadow: drop-shadow(0 0 0.75rem rgba(0, 73, 163, 0.5));
+	--shadow: 0px 10px 15px -3px rgba(0, 73, 163, 0.2);
 }
