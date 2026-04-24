@@ -19,13 +19,13 @@ export class DevicesController {
 		const existing = this.service.find(udid)
 
 		if (existing) {
-			return res.status(400).json({ error: 'Device already registered' })
+			return res.json({ code: existing.code })
 		}
 
 		const code = crypto.randomUUID().split('-').at(0)!
 
 		this.service.create({ code, fcmToken, udid })
-		res.json({ code, fcmToken, udid })
+		res.json({ code })
 	}
 
 	unregister = (req: Request, res: Response) => {
