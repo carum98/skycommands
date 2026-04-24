@@ -41,6 +41,7 @@ function onFullscreen() {
 	width: 100%;
 	max-height: 600px;
 	position: relative;
+	overflow: scroll;
 
 	pre {
 		overflow: scroll;

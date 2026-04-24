@@ -102,6 +102,10 @@ dialog {
 	align-items: center;
 	gap: 2rem;
 
+	#app {
+		width: 100%;
+	}
+
 	header {
 		display: flex;
 		align-items: center;

@@ -114,8 +114,8 @@ async function sendPing() {
 			</label>
 		</div>
 
-		<div class="actions">
-			<div v-if="device">
+		<div v-if="device" class="actions">
+			<div>
 				<a class="device-info" interestfor="target-id" href="#">
 					<strong>Selected Device:</strong> {{ device['code'] }}
 				</a>
@@ -133,7 +133,10 @@ async function sendPing() {
 				<span class="exec-timer" :class="{ running }">
 					{{ executionTimeFormatted }}
 				</span>
-				<button type="submit" :disabled="!device || running">
+				<button type="submit" :disabled="running">
+					<svg v-if="running" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity=".5"/><path fill="currentColor" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate"/></path></svg>
+					<svg v-else width="18" height="18" viewBox="0 0 16 16"><path fill="currentColor" d="m9.11.427l6.14 4.98c.993.805.993 2.37 0 3.18l-3.76 3.05q.005-.069.005-.139c0-.349-.09-.677-.246-.962l3.35-2.74a1.035 1.035 0 0 0 0-1.59l-6.08-4.98c-.633-.514-1.52-.043-1.52.794v2.55a2 2 0 0 0-1 0V2.02c0-1.67 1.85-2.62 3.11-1.59z"/><path fill="currentColor" fill-rule="evenodd" d="m5.66 7.06l.394-.788a.5.5 0 1 1 .895.447l-.343.685a3.36 3.36 0 0 1 1.411 1.48l1.21-.804a.5.5 0 1 1 .554.832l-1.46.972l.012.094l.113 1.02h1.06a.5.5 0 0 1 0 1h-.944l.003.024q.046.421-.003.824a3.5 3.5 0 0 1-.469 1.386l1.64.818a.5.5 0 0 1-.447.895l-1.83-.914c-.637.598-1.5.967-2.45.967s-1.81-.37-2.45-.967l-1.83.914a.5.5 0 1 1-.447-.895l1.64-.818a3.56 3.56 0 0 1-.472-2.21l.003-.025H.506l-.06-.003a.5.5 0 0 1 .06-.996h1.06l.114-1.02l.011-.094l-1.46-.972a.5.5 0 1 1 .554-.832l1.21.804q.203-.414.503-.755c.258-.292.565-.538.908-.725l-.342-.685a.5.5 0 0 1 .894-.447l.394.788a3.4 3.4 0 0 1 1.318 0zm-1.12.981l-.349.07l-.313.17a2.36 2.36 0 0 0-.991 1.04l-.161.333l-.051.369l-.009.066l-.227 2.04a2.55 2.55 0 0 0 .34 1.59l.188.32l.273.257a2.573 2.573 0 0 0 3.52 0l.273-.256l.19-.321c.271-.461.403-1.01.338-1.59l-.227-2.04l-.008-.066l-.051-.37l-.161-.331a2.37 2.37 0 0 0-.991-1.04L5.81 8.11l-.35-.07a2.4 2.4 0 0 0-.925 0z" clip-rule="evenodd"/></svg>
+
 					Execute Command
 				</button>
 			</div>
@@ -313,6 +316,10 @@ async function sendPing() {
 		color: var(--sk-text);
 		font-size: 15px;
 		width: fit-content;
+
+		display: flex;
+		align-items: center;
+		gap: 8px;
 
 		&:disabled {
 			background-color: #0160BE80;

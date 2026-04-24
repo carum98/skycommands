@@ -22,7 +22,7 @@ function logout() {
 <template>
 	<header>
 		<h1>
-			<img src="/favicon.ico" alt="SkyCommands Logo" width="40" height="40" />
+			<img src="/logo.png" alt="SkyCommands Logo" width="40" height="40" />
 			SkyCommands
 		</h1>
 		<button class="logout-button" type="button" @click="logout">
