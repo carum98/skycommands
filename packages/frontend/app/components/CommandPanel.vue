@@ -25,7 +25,7 @@ async function onSubmit(event: SubmitEvent) {
 	const formData = new FormData(form)
 	const json = Object.fromEntries(formData.entries())
 
-	const { command, timeout, retries, ...payload } = json
+	const { command, timeout, attempts, ...payload } = json
 
 	try {
 		startTimer()
@@ -36,7 +36,7 @@ async function onSubmit(event: SubmitEvent) {
 				deviceCode: device.value?.code,
 				command,
 				timeout: Number(timeout) || undefined,
-				retries: Number(retries) || undefined,
+				attempts: Number(attempts) || undefined,
 				payload
 			})
 		})
@@ -109,8 +109,8 @@ async function sendPing() {
 			</label>
 
 			<label>
-				Retries
-				<input type="number" name="retries" placeholder="0" />
+				Attempts
+				<input type="number" name="attempts" placeholder="1" />
 			</label>
 		</div>
 

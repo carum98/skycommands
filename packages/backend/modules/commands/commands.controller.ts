@@ -15,7 +15,7 @@ export class CommandsController {
    constructor(private devicesService: DevicesService) { }
 
    execute = async (req: Request, res: Response) => {
-      const { deviceCode, uuid, command, payload, timeout = 10000, retries = 1 } = req.body
+      const { deviceCode, uuid, command, payload, timeout = 10000, attempts = 1 } = req.body
       const device = this.devicesService.find(deviceCode || uuid)
 
       if (!device) {
@@ -30,7 +30,7 @@ export class CommandsController {
          let result: string | undefined
          let lastError: Error | undefined
 
-         for (let attempt = 1; attempt <= retries; attempt++) {
+         for (let attempt = 1; attempt <= attempts; attempt++) {
             // Each attempt uses a fresh id so a late response from a previous
             // attempt cannot resolve the current one.
             commandId = crypto.randomUUID()
@@ -58,7 +58,7 @@ export class CommandsController {
 
          if (result === undefined) throw lastError
 
-         const parsed = result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result
+         const parsed = tryParseJSON(result)
 
          logCommand({
             event: 'result',
@@ -93,14 +93,12 @@ export class CommandsController {
    receive = (req: Request, res: Response) => {
       const { commandId, result } = req.body
 
-      // Look up the pending command by ID
       const pendingCommand = this.pending.get(commandId)
 
       if (!pendingCommand) {
          return res.status(404).json({ error: 'Command not found' })
       }
 
-      // Resolve the pending command with the result and clear the timeout
       clearTimeout(pendingCommand.timeout)
       pendingCommand.resolve(result)
       this.pending.delete(commandId)
@@ -112,5 +110,14 @@ export class CommandsController {
       req.body.deviceCode = req.body.code
       req.body.command = 'ping'
       await this.execute(req, res)
+   }
+}
+
+function tryParseJSON(value: string): unknown {
+   if (!value.startsWith('{') && !value.startsWith('[')) return value
+   try {
+      return JSON.parse(value)
+   } catch {
+      return value
    }
 }
