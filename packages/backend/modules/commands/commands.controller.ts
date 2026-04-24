@@ -1,108 +1,34 @@
 import type { Request, Response } from 'express'
-import { sendFCM } from '@core/fcm'
-import { logCommand, logError } from '@core/logger'
-import { DevicesService } from '@devices/devices.service'
-
-type PendingCommand = {
-   resolve: (value: string) => void
-   reject: (error: Error) => void
-   timeout: NodeJS.Timeout
-}
+import { CommandsService, DeviceNotFoundError, DispatchError } from './commands.service'
 
 export class CommandsController {
-   private pending = new Map<string, PendingCommand>()
-
-   constructor(private devicesService: DevicesService) { }
+   constructor(private service: CommandsService) { }
 
    execute = async (req: Request, res: Response) => {
-      const { deviceCode, uuid, command, payload, timeout = 10000, attempts = 1 } = req.body
-      const device = this.devicesService.find(deviceCode || uuid)
-
-      if (!device) {
-         return res.status(404).json({ error: 'Device not found' })
-      }
-
-      // Tracks the id of the latest attempt; returned to the caller so it
-      // matches the id the device received and the one logged for that attempt.
-      let commandId: string | undefined
+      const { deviceCode, uuid, command, payload, timeout, attempts } = req.body
 
       try {
-         let result: string | undefined
-         let lastError: Error | undefined
-
-         for (let attempt = 1; attempt <= attempts; attempt++) {
-            // Each attempt uses a fresh id so a late response from a previous
-            // attempt cannot resolve the current one.
-            commandId = crypto.randomUUID()
-            const data = {
-               commandId,
-               command,
-               ...(payload && { payload: JSON.stringify(payload) })
-            }
-
-            logCommand({
-               event: 'sent',
-               commandId,
-               deviceCode: device.code as string,
-               command,
-               payload,
-            })
-
-            try {
-               result = await this.dispatchAttempt(device.fcm_token as string, data, timeout)
-               break
-            } catch (error) {
-               lastError = error as Error
-            }
-         }
-
-         if (result === undefined) throw lastError
-
-         const parsed = tryParseJSON(result)
-
-         logCommand({
-            event: 'result',
-            commandId: commandId!,
-            deviceCode: device.code as string,
+         const { commandId, result } = await this.service.dispatch(
+            deviceCode || uuid,
             command,
-            result: parsed,
-         })
-
-         res.json({ command_id: commandId, result: parsed })
+            { timeout, attempts, payload }
+         )
+         res.json({ command_id: commandId, result })
       } catch (error: unknown) {
-         const message = (error as Error).message || 'Error executing command'
-         logError('commands.execute', error, { commandId, deviceCode: device.code, command })
-         res.status(500).json({ command_id: commandId, error: message })
+         if (error instanceof DeviceNotFoundError) {
+            return res.status(404).json({ error: 'Device not found' })
+         }
+         if (error instanceof DispatchError) {
+            return res.status(500).json({ command_id: error.commandId, error: error.message })
+         }
+         res.status(500).json({ error: (error as Error).message || 'Error executing command' })
       }
-   }
-
-   private async dispatchAttempt(token: string, data: Record<string, string>, timeoutMs: number): Promise<string> {
-      const success = await sendFCM(token, data)
-      if (!success) throw new Error('Failed to send FCM')
-
-      return new Promise<string>((resolve, reject) => {
-         const id = data.commandId
-         const timer = setTimeout(() => {
-            this.pending.delete(id)
-            reject(new Error('Timeout'))
-         }, timeoutMs)
-         this.pending.set(id, { resolve, reject, timeout: timer })
-      })
    }
 
    receive = (req: Request, res: Response) => {
       const { commandId, result } = req.body
-
-      const pendingCommand = this.pending.get(commandId)
-
-      if (!pendingCommand) {
-         return res.status(404).json({ error: 'Command not found' })
-      }
-
-      clearTimeout(pendingCommand.timeout)
-      pendingCommand.resolve(result)
-      this.pending.delete(commandId)
-
+      const ok = this.service.complete(commandId, result)
+      if (!ok) return res.status(404).json({ error: 'Command not found' })
       res.json({ success: true })
    }
 
@@ -110,14 +36,5 @@ export class CommandsController {
       req.body.deviceCode = req.body.code
       req.body.command = 'ping'
       await this.execute(req, res)
-   }
-}
-
-function tryParseJSON(value: string): unknown {
-   if (!value.startsWith('{') && !value.startsWith('[')) return value
-   try {
-      return JSON.parse(value)
-   } catch {
-      return value
    }
 }

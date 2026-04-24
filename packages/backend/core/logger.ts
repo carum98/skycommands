@@ -2,9 +2,8 @@ import { appendFile, mkdir, readdir, unlink } from 'node:fs/promises'
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 
-const LOGS_DIR = process.env.LOGS_DIR || './logs'
-const COMMANDS_DIR = path.join(LOGS_DIR, 'commands')
-const ERRORS_DIR = path.join(LOGS_DIR, 'errors')
+const COMMANDS_DIR = './logs/commands'
+const ERRORS_DIR = './logs/errors'
 
 mkdirSync(COMMANDS_DIR, { recursive: true })
 mkdirSync(ERRORS_DIR, { recursive: true })
@@ -29,13 +28,14 @@ async function writeLine(dir: string, entry: Record<string, unknown>) {
 }
 
 export type CommandLogEntry = {
-	event: 'sent' | 'result'
+	event: 'sent' | 'result' | 'failed'
 	commandId: string
 	deviceCode?: string
 	command?: string
 	payload?: unknown
 	result?: unknown
 	error?: string
+	attempt?: number
 }
 
 export function logCommand(entry: CommandLogEntry) {

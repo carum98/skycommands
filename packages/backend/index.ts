@@ -2,13 +2,15 @@ import { getDB } from '@core/database'
 import { Server } from '@core/server'
 import { DepencyInjection } from '@core/di'
 import { DevicesService } from '@devices/devices.service'
+import { CommandsService } from '@modules/commands/commands.service'
 
 import '@core/scheduler'
 
 const db = getDB()
 
 const di = DepencyInjection.getInstance()
-di.register(() => new DevicesService(db))
+const deviceService = di.register(() => new DevicesService(db))
+const commandsService = di.register(() => new CommandsService(deviceService))
 
 const server = new Server()
 

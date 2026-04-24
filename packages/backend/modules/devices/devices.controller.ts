@@ -36,7 +36,7 @@ export class DevicesController {
 		const existing = this.service.find(code as string)
 		if (!existing) return res.status(404).json({ error: 'Device not found' })
 
-		this.service.delete(existing.id as number)
+		this.service.delete(existing.id)
 		res.json({ success: true })
 	}
 
@@ -50,7 +50,7 @@ export class DevicesController {
 		const existing = this.service.find(udid)
 		if (!existing) return res.status(404).json({ error: 'Device not found' })
 
-		this.service.heartbeat(existing.id as number)
+		this.service.heartbeat(existing.id)
 
 		res.json({ success: true })
 	}
@@ -66,7 +66,7 @@ export class DevicesController {
 		const existing = this.service.find(code as string)
 		if (!existing) return res.status(404).json({ error: 'Device not found' })
 
-		this.service.updateMetadata(existing.id as number, metadata)
+		this.service.updateMetadata(existing.id, metadata)
 
 		res.json({ success: true })
 	}
