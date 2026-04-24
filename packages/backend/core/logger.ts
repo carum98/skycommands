@@ -47,7 +47,7 @@ export function logError(context: string, error: unknown, meta?: Record<string, 
 		? { message: error.message, stack: error.stack, name: error.name }
 		: { message: String(error) }
 
-	void writeLine(ERRORS_DIR, { context, ...err, ...(meta || {}) })
+	void writeLine(ERRORS_DIR, { context, ...(meta || {}), ...err })
 }
 
 export async function cleanupOldLogs(retentionDays: number) {
