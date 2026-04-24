@@ -22,73 +22,72 @@ export class CommandsController {
          return res.status(404).json({ error: 'Device not found' })
       }
 
-      // Generate a unique command ID for tracking
-      const commandId = crypto.randomUUID()
-
-      logCommand({ 
-         event: 'sent', 
-         commandId, 
-         deviceCode: device.code as string, 
-         command, 
-         payload 
-      })
+      // Tracks the id of the latest attempt; returned to the caller so it
+      // matches the id the device received and the one logged for that attempt.
+      let commandId: string | undefined
 
       try {
-         // Data to be sent to the device
-         const data = {
-            commandId,
-            command,
-            ...(payload && { payload: JSON.stringify(payload) })
-         }
-
-         // Attempt to send the command with retries
          let result: string | undefined
          let lastError: Error | undefined
 
          for (let attempt = 1; attempt <= retries; attempt++) {
+            // Each attempt uses a fresh id so a late response from a previous
+            // attempt cannot resolve the current one.
+            commandId = crypto.randomUUID()
+            const data = {
+               commandId,
+               command,
+               ...(payload && { payload: JSON.stringify(payload) })
+            }
+
+            logCommand({
+               event: 'sent',
+               commandId,
+               deviceCode: device.code as string,
+               command,
+               payload,
+            })
+
             try {
-               // Send the command via FCM and wait for the response or timeout
-               result = await new Promise(async (resolve, reject) => {
-                  const success = await sendFCM(device.fcm_token as string, data)
-
-                  if (success) {
-                     // Set up a timeout to reject the promise if no response is received in time
-                     const timer = setTimeout(() => {
-                        this.pending.delete(commandId)
-                        reject(new Error('Timeout'))
-                     }, timeout)
-
-                     // Store the resolve and reject functions in the pending map for later through receive endpoint
-                     this.pending.set(commandId, { resolve, reject, timeout: timer })
-                  } else {
-                     reject(new Error('Failed to send FCM'))
-                  }
-               })
+               result = await this.dispatchAttempt(device.fcm_token as string, data, timeout)
                break
             } catch (error) {
                lastError = error as Error
             }
          }
 
-         // If we exhausted all retries and still have no result, throw the last error
          if (result === undefined) throw lastError
 
          const parsed = result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result
 
          logCommand({
             event: 'result',
-            commandId,
+            commandId: commandId!,
             deviceCode: device.code as string,
             command,
             result: parsed,
          })
 
          res.json({ command_id: commandId, result: parsed })
-      } catch (error: Error | unknown) {
+      } catch (error: unknown) {
          const message = (error as Error).message || 'Error executing command'
          logError('commands.execute', error, { commandId, deviceCode: device.code, command })
          res.status(500).json({ command_id: commandId, error: message })
       }
+   }
+
+   private async dispatchAttempt(token: string, data: Record<string, string>, timeoutMs: number): Promise<string> {
+      const success = await sendFCM(token, data)
+      if (!success) throw new Error('Failed to send FCM')
+
+      return new Promise<string>((resolve, reject) => {
+         const id = data.commandId
+         const timer = setTimeout(() => {
+            this.pending.delete(id)
+            reject(new Error('Timeout'))
+         }, timeoutMs)
+         this.pending.set(id, { resolve, reject, timeout: timer })
+      })
    }
 
    receive = (req: Request, res: Response) => {
