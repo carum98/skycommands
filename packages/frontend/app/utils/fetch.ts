@@ -3,7 +3,7 @@ import { useAuth } from '@composables/useAuth'
 export type FetchRequestOptions = RequestInit & { query?: Record<string, string | undefined> }
 
 export async function $fetch<T>(url: string, options?: FetchRequestOptions) {
-	const uri = new URL('/api' + url, window.location.origin)
+	const uri = new URL(url, import.meta.env.VITE_BACKEND_URL)
 
 	// Add query parameters to the URL
 	if (options?.query) {

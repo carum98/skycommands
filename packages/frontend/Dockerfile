@@ -1,7 +1,7 @@
 # Stage 1: Build
 FROM node:25-alpine3.22 AS builder
 
-ARG VITE_URL_BACKEND=
+ARG VITE_BACKEND_URL=
 
 WORKDIR /app
 
