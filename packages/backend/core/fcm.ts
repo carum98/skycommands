@@ -1,4 +1,5 @@
 import admin from 'firebase-admin'
+import { logError } from '@core/logger'
 
 import googleServices from '../serviceAccountKey.json'
 
@@ -19,7 +20,7 @@ export async function sendFCM(token: string, payload: Record<string, string>): P
 		})
 		return true
 	} catch (error) {
-		console.error('Error sending FCM:', error)
+		logError('fcm.send', error, { token })
 		return false
 	}
 }

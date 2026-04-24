@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite'
+import { logError } from '@core/logger'
 
 const db = new DatabaseSync('./database.db')
 
@@ -40,7 +41,7 @@ export function getDB() {
 		runMigrations()
 		return db
 	} catch (error) {
-		console.error('Failed to initialize database:', error)
+		logError('database.init', error)
 		throw error
 	}
 }

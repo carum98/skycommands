@@ -2,3 +2,4 @@ database.db
 serviceAccountKey.json
 dist
 .env
+logs

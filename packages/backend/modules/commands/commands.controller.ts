@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { sendFCM } from '@core/fcm'
+import { logCommand, logError } from '@core/logger'
 import { DevicesService } from '@devices/devices.service'
 
 type PendingCommand = {
@@ -23,6 +24,14 @@ export class CommandsController {
 
       // Generate a unique command ID for tracking
       const commandId = crypto.randomUUID()
+
+      logCommand({ 
+         event: 'sent', 
+         commandId, 
+         deviceCode: device.code as string, 
+         command, 
+         payload 
+      })
 
       try {
          // Data to be sent to the device
@@ -64,16 +73,21 @@ export class CommandsController {
          // If we exhausted all retries and still have no result, throw the last error
          if (result === undefined) throw lastError
 
-         // Parse result if it's JSON, otherwise return as string
-         res.json({
-            command_id: commandId,
-            result: result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result,
+         const parsed = result.startsWith('{') || result.startsWith('[') ? JSON.parse(result) : result
+
+         logCommand({
+            event: 'result',
+            commandId,
+            deviceCode: device.code as string,
+            command,
+            result: parsed,
          })
+
+         res.json({ command_id: commandId, result: parsed })
       } catch (error: Error | unknown) {
-         res.status(500).json({
-            command_id: commandId,
-            error: (error as Error).message || 'Error executing command'
-         })
+         const message = (error as Error).message || 'Error executing command'
+         logError('commands.execute', error, { commandId, deviceCode: device.code, command })
+         res.status(500).json({ command_id: commandId, error: message })
       }
    }
 

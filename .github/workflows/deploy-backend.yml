@@ -64,4 +64,5 @@ jobs:
             -e APP_KEY='${{ secrets.APP_KEY }}' \
             -v $(pwd)/database.db:/app/database.db \
             -v $(pwd)/serviceAccountKey.json:/app/serviceAccountKey.json \
+            -v $(pwd)/logs:/app/logs \
             ${{ env.IMAGE_REF }}
