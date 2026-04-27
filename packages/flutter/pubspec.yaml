@@ -1,10 +1,12 @@
-name: 'skycommands'
-description: 'SkyCommands Flutter is an adapter for [SkyCommands]. It provides a way to use SkyCommands in your Flutter application.'
+name: skycommands
+description: Flutter SDK for SkyCommands — receive remote commands on production devices via Firebase Cloud Messaging and send results back to the backend.
 version: 0.0.1
+homepage: https://github.com/carum98/skycommands
+repository: https://github.com/carum98/skycommands
+issue_tracker: https://github.com/carum98/skycommands/issues
 
 platforms:
   android:
-  ios:
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -20,4 +22,3 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
-  

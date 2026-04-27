@@ -7,7 +7,7 @@ Platform for sending remote commands to Flutter devices in production and viewin
 Three pieces that live in this monorepo under `packages/`:
 
 - **Backend** (`packages/backend`) — HTTP API in Node.js + Express with SQLite. Maintains the device registry and dispatches commands via Firebase Cloud Messaging (FCM). [See README →](./packages/backend/README.md)
-- **Flutter SDK** (`packages/flutter`) — library that integrates into the mobile app, receives commands via FCM and runs the callback the app defines. Sends the result back to the backend.
+- **Flutter SDK** (`packages/flutter`) — library that integrates into the mobile app, receives commands via FCM and runs the callback the app defines. Sends the result back to the backend. [See README →](./packages/flutter/README.md)
 - **Frontend** (`packages/frontend`) — Vue 3 + Vite SPA where an operator authenticates, looks up devices and dispatches commands. [See README →](./packages/frontend/README.md)
 
 ### Command flow

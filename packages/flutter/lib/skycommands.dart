@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -21,7 +22,13 @@ class SkyCommands {
   ///
   /// [host] is the base URL of the SkyCommands backend.
   /// [appKey] is the bearer token used to authenticate against the API.
-  SkyCommands({required String host, String? appKey}) : _http = _RequestHttp(host, appKey: appKey);
+  ///
+  /// Throws an [UnsupportedError] when called on a platform other than Android.
+  SkyCommands({required String host, String? appKey}) : _http = _RequestHttp(host, appKey: appKey) {
+    if (!Platform.isAndroid) {
+      throw UnsupportedError('SkyCommands is only supported on Android.');
+    }
+  }
 
   final _fcm = FirebaseMessaging.instance;
 
@@ -29,13 +36,17 @@ class SkyCommands {
 
   /// Registers the FCM message handlers used to dispatch incoming commands.
   ///
+  /// [callback] must be a top-level or `static` function — Firebase invokes
+  /// the background handler from a separate isolate, so closures and instance
+  /// methods will not work for background messages.
+  ///
   /// Safe to call multiple times: subsequent calls are no-ops.
-  void initialize(BackgroundMessageHandler callBack) {
+  void initialize(BackgroundMessageHandler callback) {
     if (_initialized) return;
     _initialized = true;
 
-    FirebaseMessaging.onBackgroundMessage(callBack);
-    FirebaseMessaging.onMessage.listen(callBack);
+    FirebaseMessaging.onBackgroundMessage(callback);
+    FirebaseMessaging.onMessage.listen(callback);
   }
 
   /// Registers this device with the backend using its FCM token and UDID.
@@ -64,7 +75,7 @@ class SkyCommands {
   }
 
   /// Updates the device metadata stored on the backend.
-  Future<void> setMetadata(Map<String, String?> metadata) async {
+  Future<void> setMetadata(Map<String, dynamic> metadata) async {
     final udid = await FlutterUdid.udid;
     await _http.put('/devices/$udid/metadata', metadata);
   }
@@ -79,29 +90,33 @@ class SkyCommands {
   Future<void> runner(
     RemoteMessage message,
     CommandCallback executeCommand, {
-    Function(String error)? onError,
+    void Function(String error)? onError,
   }) async {
     final data = message.data;
 
     if (data.containsKey('commandId') && data.containsKey('command')) {
-      final commandId = data['commandId'];
-      final command = data['command'];
+      final commandId = data['commandId'] as String;
+      final command = data['command'] as String;
+      final payload = data['payload'] as String?;
 
       Future<void> sendResult(String result) async {
         await _http.post('/commands/result', {'commandId': commandId, 'result': result});
       }
 
-      try {
-        if (command == 'ping') {
-          await sendResult('pong');
-          return;
-        }
+      if (command == 'ping') {
+        await sendResult('pong');
+        return;
+      }
 
-        final result = await executeCommand(command, data['payload']);
-        await sendResult(result);
+      final String result;
+      try {
+        result = await executeCommand(command, payload);
       } catch (error) {
         onError?.call(error.toString());
+        return;
       }
+
+      await sendResult(result);
     }
   }
 }
@@ -110,23 +125,22 @@ class SkyCommands {
 ///
 /// Network connectivity errors ([SocketException], [HandshakeException]) are
 /// silently swallowed so the SDK does not surface noise when the device is
-/// offline. HTTP errors (non-200 responses) still propagate as [HttpException].
+/// offline. HTTP errors (non-2xx responses) still propagate as [HttpException].
 class _RequestHttp {
+  static const _connectionTimeout = Duration(seconds: 10);
+  static const _requestTimeout = Duration(seconds: 30);
+
   final String host;
   final String? _appKey;
-  final _client = HttpClient();
+  final _client = HttpClient()..connectionTimeout = _connectionTimeout;
 
   _RequestHttp(this.host, {String? appKey}) : _appKey = appKey;
 
-  Future<void> get(String path) async {
-    await _request('GET', path);
-  }
-
-  Future<void> post(String path, Map<String, String?> body) async {
+  Future<void> post(String path, Map<String, dynamic> body) async {
     await _request('POST', path, body: body);
   }
 
-  Future<void> put(String path, Map<String, String?> body) async {
+  Future<void> put(String path, Map<String, dynamic> body) async {
     await _request('PUT', path, body: body);
   }
 
@@ -137,13 +151,12 @@ class _RequestHttp {
   Future<void> _request(
     String method,
     String path, {
-    Map<String, String?>? body,
+    Map<String, dynamic>? body,
   }) async {
     final uri = Uri.parse(host).replace(path: path);
 
     try {
       final request = switch (method) {
-        'GET' => await _client.getUrl(uri),
         'POST' => await _client.postUrl(uri),
         'DELETE' => await _client.deleteUrl(uri),
         'PUT' => await _client.putUrl(uri),
@@ -159,8 +172,8 @@ class _RequestHttp {
         request.add(utf8.encode(jsonEncode(body)));
       }
 
-      final response = await request.close();
-      if (response.statusCode != 200) {
+      final response = await request.close().timeout(_requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException(
           response.reasonPhrase ?? 'Unknown error',
           statusCode: response.statusCode,
@@ -170,11 +183,13 @@ class _RequestHttp {
       // Device is offline or host is unreachable; fail silently.
     } on HandshakeException {
       // TLS handshake failed; treat as a connectivity issue and fail silently.
+    } on TimeoutException {
+      // Server did not respond within the request timeout; fail silently.
     }
   }
 }
 
-/// Thrown when the backend returns a non-200 HTTP response.
+/// Thrown when the backend returns a non-2xx HTTP response.
 class HttpException implements Exception {
   final String message;
   final int? statusCode;
