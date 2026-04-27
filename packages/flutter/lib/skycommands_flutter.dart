@@ -8,8 +8,7 @@ typedef CommandCallback = Future<String> Function(String command, String? payloa
 
 class SkyCommands {
   final RequestHttp _http;
-  SkyCommands({required String host, String? appKey})
-      : _http = RequestHttp(host, appKey: appKey);
+  SkyCommands({required String host, String? appKey}) : _http = RequestHttp(host, appKey: appKey);
 
   final _fcm = FirebaseMessaging.instance;
 
@@ -23,16 +22,14 @@ class SkyCommands {
     FirebaseMessaging.onMessage.listen(callBack);
   }
 
-  Future<String> register() async {
+  Future<void> register() async {
     final token = await _fcm.getToken();
     final udid = await FlutterUdid.udid;
 
-    final response = await _http.post('/devices', {
+    await _http.post('/devices', {
       'fcmToken': token,
       'udid': udid,
     });
-
-    return response['code'];
   }
 
   Future<void> unregister() async {
