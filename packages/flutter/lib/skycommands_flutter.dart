@@ -13,7 +13,12 @@ class SkyCommands {
 
   final _fcm = FirebaseMessaging.instance;
 
+  bool _initialized = false;
+
   void initialize(BackgroundMessageHandler callBack) {
+    if (_initialized) return;
+    _initialized = true;
+
     FirebaseMessaging.onBackgroundMessage(callBack);
     FirebaseMessaging.onMessage.listen(callBack);
   }
