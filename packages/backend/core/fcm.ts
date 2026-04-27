@@ -19,8 +19,18 @@ export async function sendFCM(token: string, payload: Record<string, string>): P
 			}
 		})
 		return true
-	} catch (error) {
-		logError('fcm.send', error, { token })
+	} catch (error: any) {
+		if (error?.errorInfo?.code === 'messaging/registration-token-not-registered') {
+			throw new FCMUnregisteredError(token)
+		}
+		logError('fcm.send', error)
 		return false
+	}
+}
+
+export class FCMUnregisteredError extends Error {
+	constructor(token: string) {
+		super(`FCM token is no longer registered: ${token}`)
+		this.name = 'FCMUnregisteredError'
 	}
 }

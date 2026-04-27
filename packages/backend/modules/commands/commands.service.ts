@@ -1,4 +1,4 @@
-import { sendFCM } from '@core/fcm'
+import { FCMUnregisteredError, sendFCM } from '@core/fcm'
 import { logCommand, logError } from '@core/logger'
 import { DevicesService } from '@devices/devices.service'
 
@@ -73,15 +73,21 @@ export class CommandsService {
             result = await this.dispatchAttempt(device.fcm_token, data, timeout)
             break
          } catch (error) {
-            lastError = error as Error
             logCommand({
                event: 'failed',
                commandId,
                deviceCode: device.code,
                command,
                attempt,
-               error: lastError.message,
+               error: (error as Error).message
             })
+
+            if (error instanceof FCMUnregisteredError) {
+               this.devicesService.delete(device.id)
+               throw new DispatchError('Device is no longer registered', commandId)
+            }
+
+            lastError = error as Error
          }
       }
 
@@ -116,6 +122,7 @@ export class CommandsService {
    private async dispatchAttempt(token: string, data: Record<string, string>, timeoutMs: number): Promise<string> {
       const success = await sendFCM(token, data)
       if (!success) throw new Error('Failed to send FCM')
+      // Note: FCMUnregisteredError is intentionally not caught here — it propagates up
 
       return new Promise<string>((resolve, reject) => {
          const id = data.commandId
