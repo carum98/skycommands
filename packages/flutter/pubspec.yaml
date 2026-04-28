@@ -15,8 +15,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_messaging: 16.0.4
-  flutter_udid: 4.1.1
+  firebase_messaging: ^16.0.4
+  flutter_udid: ^4.1.1
 
 dev_dependencies:
   flutter_lints: ^2.0.0

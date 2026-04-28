@@ -175,7 +175,7 @@ class _RequestHttp {
       final response = await request.close().timeout(_requestTimeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException(
-          response.reasonPhrase ?? 'Unknown error',
+          response.reasonPhrase,
           statusCode: response.statusCode,
         );
       }
