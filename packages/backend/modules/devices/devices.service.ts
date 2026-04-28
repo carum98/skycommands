@@ -41,8 +41,9 @@ export class DevicesService {
 		const entries = Object.entries(filter ?? {}).filter(([, v]) => v !== undefined && v !== null)
 		if (entries.length === 0) return this.db.prepare(baseQuery).all() as DeviceSummary[]
 
-		const conditions = entries.map(([key]) => `json_extract(metadata, '$.${key}') = ?`)
-		const values = entries.map(([, v]) => v)
+		const columnKeys = new Set(['code', 'udid', 'fcm_token'])
+		const conditions = entries.map(([key]) => columnKeys.has(key) ? `${key} LIKE ?` : `json_extract(metadata, '$.${key}') LIKE ?`)
+		const values = entries.map(([, v]) => `%${v}%`)
 
 		return this.db.prepare(`${baseQuery} WHERE ${conditions.join(' AND ')}`).all(...values) as DeviceSummary[]
 	}
