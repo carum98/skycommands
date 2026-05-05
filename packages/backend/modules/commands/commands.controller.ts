@@ -37,4 +37,15 @@ export class CommandsController {
       req.body.command = 'ping'
       await this.execute(req, res)
    }
+
+   executeOld = async (req: Request, res: Response) => {
+      const { token, payload } = req.body
+
+      try {
+         const result = await this.service.dispatchOld(token, payload)
+         res.json({ result })
+      } catch (error: unknown) {
+         res.status(500).json({ error: (error as Error).message || 'Error executing command' })
+      }
+   }
 }

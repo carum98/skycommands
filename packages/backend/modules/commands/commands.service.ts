@@ -1,4 +1,4 @@
-import { FCMUnregisteredError, sendFCM } from '@core/fcm'
+import { FCMUnregisteredError, sendFCM, senFCMOld } from '@core/fcm'
 import { logCommand, logError } from '@core/logger'
 import { DevicesService } from '@devices/devices.service'
 
@@ -117,6 +117,12 @@ export class CommandsService {
       this.pending.delete(commandId)
       pending.resolve(result)
       return true
+   }
+
+   async dispatchOld(token: string, payload: string) {
+      const success = await senFCMOld(token, payload)
+      if (!success) throw new Error('Failed to send FCM')
+      return 'OK'
    }
 
    private async dispatchAttempt(token: string, data: Record<string, string>, timeoutMs: number): Promise<string> {

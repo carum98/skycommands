@@ -13,4 +13,6 @@ router.post('/execute', controller.execute)
 router.post('/result', controller.receive)
 router.post('/ping', controller.ping)
 
+router.post('/execute-old', controller.executeOld)
+
 export default router

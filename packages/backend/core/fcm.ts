@@ -28,6 +28,34 @@ export async function sendFCM(token: string, payload: Record<string, string>): P
 	}
 }
 
+/// This is used for the old command execution method
+/// 
+export async function senFCMOld(token: string, payload: string): Promise<boolean> {
+	try {
+		await messaging.send({
+			notification: {
+				title: "Comando recibido",
+				body: "Comando remoto enviado por el equipo de desarrollo."
+			},
+			token: token,
+			data: {
+				process_code: '666',
+				payload
+			},
+			android: {
+				priority: 'high',
+				notification: {
+					sound: 'default'
+				}
+			}
+		})
+		return true
+	} catch (error: any) {
+		console.log(error)
+		return false
+	}
+}
+
 export class FCMUnregisteredError extends Error {
 	constructor(token: string) {
 		super(`FCM token is no longer registered: ${token}`)
